@@ -1,6 +1,10 @@
-
+import Login from "./pages/login";
+import Register from "./pages/register";
 export default function Home() {
   return (
-      <h1>AI-Resume-Analyzer</h1>
+    <div>
+      <Login />
+      <Register />
+      </div>
   );
 }
