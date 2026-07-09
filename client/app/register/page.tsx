@@ -37,7 +37,8 @@ export default function Register() {
         password,
       });
       alert("Registration Successfull");
-    } catch (err) {
+    } catch (err:unknown) {
+      console.log(err);
       setError("Something went wrong.");
     } finally {
       setLoading(false);

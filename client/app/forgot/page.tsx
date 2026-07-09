@@ -1,7 +1,17 @@
 import Link from "next/link";
 import Image from "next/image";
+import { useState } from "react";
 
 export default function ForgotPassword() {
+  const [email, setEmail] = useState("");
+  const[error,setError] = useState(""); 
+  const handleForgot = async() => {
+    setError("");
+    if(!email){
+      setError("Email field Cannot be Empty");
+      return;
+    }
+  }
   return (
     <div className="flex min-h-screen bg-gray-100">
       <div className="w-1/2 flex items-center justify-center">
@@ -29,10 +39,15 @@ export default function ForgotPassword() {
           </p>
           <input
             type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             placeholder="Enter Email"
             className="w-full border border-gray-300 rounded-lg px-4 py-4 mb-6 outline-none focus:ring-2 focus:ring-blue-400 text-black"
           />
-          <button className="w-full bg-blue-500 hover:bg-blue-600 text-white py-4 rounded-lg font-semibold transition">
+          {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+          <button
+          onClick={handleForgot}
+           className="w-full bg-blue-500 hover:bg-blue-600 text-white py-4 rounded-lg font-semibold transition">
             Send Reset Link
           </button>
           <div className="text-center mt-8">
