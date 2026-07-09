@@ -2,8 +2,8 @@
 import Link from "next/link";
 import { FcGoogle } from "react-icons/fc";
 import Image from "next/image";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useState } from "react";
+import PasswordInput from "@/components/passwordInput";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -70,23 +70,13 @@ export default function Login() {
             placeholder="Enter Email"
             className="w-full border border-gray-300 rounded-lg px-4 py-4 mb-4 outline-none focus:ring-2 focus:ring-blue-400 text-black"
           />
-          <div className="relative mb-2">
-            <input
-              type={showPassword ? "text" : "password"}
-              placeholder="Enter Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg py-4 pl-4 pr-14 outline-none focus:ring-2 focus:ring-blue-400 text-black"
-            />
-
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute inset-y-0 right-4 flex items-center text-gray-500 hover:text-gray-700"
-            >
-              {showPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
-            </button>
-          </div>
+          <PasswordInput
+                      placeholder="Enter Password"
+                      value={password}
+                      onChange={setPassword}
+                      showPassword={showPassword}
+                      setShowPassword={setShowPassword}
+                    />
           <div className="flex items-center justify-between mb-6">
             <label className="flex items-center gap-2 text-sm text-gray-600">
               <input type="checkbox" className="w-4 h-4" />
