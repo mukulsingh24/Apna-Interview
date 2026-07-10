@@ -1,17 +1,25 @@
+"use client";
 import Link from "next/link";
+import { auth } from "../firebase/firebase";
 import Image from "next/image";
 import { useState } from "react";
-
+import { sendPasswordResetEmail } from "firebase/auth";
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
-  const[error,setError] = useState(""); 
-  const handleForgot = async() => {
+  const [error, setError] = useState("");
+  const handleForgot = async () => {
     setError("");
-    if(!email){
+    if (!email) {
       setError("Email field Cannot be Empty");
       return;
     }
-  }
+    try {
+      await sendPasswordResetEmail(auth, email);
+    } catch (err) {
+      console.error(err);
+      setError("Failed to send reset link.");
+    }
+  };
   return (
     <div className="flex min-h-screen bg-gray-100">
       <div className="w-1/2 flex items-center justify-center">
@@ -29,13 +37,11 @@ export default function ForgotPassword() {
           <h1 className="text-4xl font-bold leading-tight mb-3 text-black">
             Forgot Your
             <br />
-            <span className="text-blue-500">
-              Password?
-            </span>
+            <span className="text-blue-500">Password?</span>
           </h1>
           <p className="text-gray-500 mb-8">
-            No worries! Enter your registered email address and we&apos;ll send you a
-            password reset link.
+            No worries! Enter your registered email address and we&apos;ll send
+            you a password reset link.
           </p>
           <input
             type="email"
@@ -46,8 +52,9 @@ export default function ForgotPassword() {
           />
           {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
           <button
-          onClick={handleForgot}
-           className="w-full bg-blue-500 hover:bg-blue-600 text-white py-4 rounded-lg font-semibold transition">
+            onClick={handleForgot}
+            className="cursor-pointer w-full bg-blue-500 hover:bg-blue-600 text-white py-4 rounded-lg font-semibold transition"
+          >
             Send Reset Link
           </button>
           <div className="text-center mt-8">

@@ -1,16 +1,35 @@
 "use client";
+import {
+  signInWithEmailAndPassword,
+  GoogleAuthProvider,
+  signInWithPopup,
+} from "firebase/auth";
+import { FirebaseError } from "firebase/app";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { FcGoogle } from "react-icons/fc";
 import Image from "next/image";
 import { useState } from "react";
 import PasswordInput from "@/components/passwordInput";
-
+import { auth } from "../firebase/firebase";
 export default function Login() {
   const [email, setEmail] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const handleGoogleSignin = async () => {
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      console.log(result.user);
+      router.push("/dashboard");
+    } catch (err) {
+      console.error(err);
+      setError("Google signup failed.");
+    }
+  };
   const handleLogin = async () => {
     setError("");
     if (!email || !password) {
@@ -23,19 +42,38 @@ export default function Login() {
     }
     try {
       setLoading(true);
-      console.log({
+      const LoginCredentials = await signInWithEmailAndPassword(
+        auth,
         email,
         password,
-      });
-      alert("Login Successfull");
+      );
+      console.log(LoginCredentials.user);
+      router.push("/dashboard");
     } catch (err: unknown) {
-      console.log(err);
-      setError("Something went wrong.");
+      if (err instanceof FirebaseError) {
+        switch (err.code) {
+          case "auth/user-not-found":
+            setError("No account found with this email.");
+            break;
+
+          case "auth/wrong-password":
+            setError("Incorrect password.");
+            break;
+
+          case "auth/invalid-email":
+            setError("Invalid email address.");
+            break;
+
+          default:
+            setError(err.message);
+        }
+      } else {
+        setError("Something went wrong.");
+      }
     } finally {
       setLoading(false);
     }
   };
-
   return (
     <div className="flex min-h-screen bg-gray-100">
       <div className="w-1/2 flex items-center justify-center">
@@ -54,7 +92,10 @@ export default function Login() {
             Welcome to <br />
             <span className="text-blue-500">Apna Interview</span>
           </h1>
-          <button className="w-full flex items-center justify-center gap-3 border rounded-lg px-6 py-4 bg-white shadow-sm hover:bg-gray-100 transition">
+          <button
+            onClick={handleGoogleSignin}
+            className="cursor-pointer w-full flex items-center justify-center gap-3 border rounded-lg px-6 py-4 bg-white shadow-sm hover:bg-gray-100 transition"
+          >
             <FcGoogle size={24} />
             <span className="text-black font-medium">Login with Google</span>
           </button>
@@ -71,12 +112,12 @@ export default function Login() {
             className="w-full border border-gray-300 rounded-lg px-4 py-4 mb-4 outline-none focus:ring-2 focus:ring-blue-400 text-black"
           />
           <PasswordInput
-                      placeholder="Enter Password"
-                      value={password}
-                      onChange={setPassword}
-                      showPassword={showPassword}
-                      setShowPassword={setShowPassword}
-                    />
+            placeholder="Enter Password"
+            value={password}
+            onChange={setPassword}
+            showPassword={showPassword}
+            setShowPassword={setShowPassword}
+          />
           <div className="flex items-center justify-between mb-6">
             <label className="flex items-center gap-2 text-sm text-gray-600">
               <input type="checkbox" className="w-4 h-4" />
@@ -93,7 +134,7 @@ export default function Login() {
           <button
             onClick={handleLogin}
             disabled={loading}
-            className="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300 disabled:cursor-not-allowed text-white py-4 rounded-lg font-semibold transition"
+            className="cursor-pointer w-full bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300 disabled:cursor-not-allowed text-white py-4 rounded-lg font-semibold transition"
           >
             {loading ? "Logging in..." : "Login"}
           </button>

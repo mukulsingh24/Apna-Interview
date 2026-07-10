@@ -1,10 +1,13 @@
 "use client";
-
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { auth } from "../firebase/firebase";
+import { createUserWithEmailAndPassword } from "firebase/auth";
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
 import { FcGoogle } from "react-icons/fc";
 import PasswordInput from "@/components/passwordInput";
+import { useRouter } from "next/navigation";
 export default function Register() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -16,6 +19,18 @@ export default function Register() {
   const [error, setError] = useState("");
   const passwordLength = password.length >= 8;
   const passwordsMatch = password === confirmPassword || confirmPassword === "";
+  const router = useRouter();
+  const handleGoogleSignup = async () => {
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      console.log(result.user);
+      router.push("/dashboard");
+    } catch (err) {
+      console.error(err);
+      setError("Google signup failed.");
+    }
+  };
   const handleRegister = async () => {
     setError("");
     if (!username || !email || !password || !confirmPassword) {
@@ -32,12 +47,13 @@ export default function Register() {
     }
     try {
       setLoading(true);
-      console.log({
-        username,
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
         email,
         password,
-      });
-      alert("Registration Successfull");
+      );
+      console.log(userCredential.user);
+      router.push("/login");
     } catch (err: unknown) {
       console.log(err);
       setError("Something went wrong.");
@@ -63,7 +79,10 @@ export default function Register() {
             Welcome to <br />
             <span className="text-blue-500">Apna Interview</span>
           </h1>
-          <button className="w-full flex items-center justify-center gap-3 border rounded-lg px-6 py-4 bg-white shadow-sm hover:bg-gray-100 transition">
+          <button
+            onClick={handleGoogleSignup}
+            className="cursor-pointer w-full flex items-center justify-center gap-3 border rounded-lg px-6 py-4 bg-white shadow-sm hover:bg-gray-100 transition"
+          >
             <FcGoogle size={24} />
             <span className="text-black font-medium">Signup with Google</span>
           </button>
@@ -125,7 +144,7 @@ export default function Register() {
           <button
             onClick={handleRegister}
             disabled={loading}
-            className="w-full bg-blue-500 hover:bg-blue-600 text-white py-4 rounded-lg font-semibold transition disabled:bg-blue-300"
+            className="cursor-pointer w-full bg-blue-500 hover:bg-blue-600 text-white py-4 rounded-lg font-semibold transition disabled:bg-blue-300"
           >
             {loading ? "Creating Account..." : "Register"}
           </button>
