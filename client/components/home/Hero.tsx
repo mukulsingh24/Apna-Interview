@@ -25,8 +25,8 @@ export default function Hero() {
           </p>
           <div className="mt-9 flex flex-col gap-3 sm:flex-row">
             <Link
-              href="/analyze"
-              className="inline-flex items-center justify-center rounded-lg bg-linear-to-r from-blue-600 to-indigo-600 px-6 py-3.5 text-[15px] font-semibold text-white shadow-[0_1px_2px_rgba(15,23,42,0.08),0_12px_24px_-8px_rgba(37,99,235,0.45)] transition-all duration-200 hover:shadow-[0_1px_2px_rgba(15,23,42,0.08),0_16px_32px_-8px_rgba(37,99,235,0.55)] hover:-translate-y-0.5"
+            href="/login"
+            className="inline-flex items-center justify-center rounded-lg bg-linear-to-r from-blue-600 to-indigo-600 px-6 py-3.5 text-[15px] font-semibold text-white shadow-[0_1px_2px_rgba(15,23,42,0.08),0_12px_24px_-8px_rgba(37,99,235,0.45)] transition-all duration-200 hover:shadow-[0_1px_2px_rgba(15,23,42,0.08),0_16px_32px_-8px_rgba(37,99,235,0.55)] hover:-translate-y-0.5"
             >
               Analyze Resume
             </Link>

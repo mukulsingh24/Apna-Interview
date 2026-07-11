@@ -33,7 +33,7 @@ export default function Footer() {
                 <FiGithub size={16} />
               </a>
               <a
-                href="www.linkedin.com/in/mukulsingh9"
+                href="https://www.linkedin.com/in/mukulsingh9"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="LinkedIn"
