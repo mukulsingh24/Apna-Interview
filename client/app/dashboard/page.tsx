@@ -1,22 +1,37 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect,useState } from "react";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "../firebase/firebase";
 import { useRouter } from "next/navigation";
 export default function Dashboard() {
+  const [checkingAuth, setCheckingAuth] = useState(true);
   const router = useRouter();
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (!user) {
         router.push("/login");
+      } else {
+        setCheckingAuth(false);
       }
     });
+
     return () => unsubscribe();
   }, [router]);
   const handleLogout = async () => {
-    await signOut(auth);
-    router.push("/login");
+    try {
+      await signOut(auth);
+      router.replace("/login");
+    } catch (err) {
+      console.error(err);
+    }
   };
+  if (checkingAuth) {
+    return (
+      <div className="min-h-screen flex justify-center items-center">
+        Loading
+      </div>
+    );
+  }
   return (
     <main className="min-h-screen bg-gray-100">
       <div className="bg-white shadow px-8 py-5 flex justify-between items-center">
