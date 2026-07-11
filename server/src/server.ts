@@ -1,18 +1,16 @@
 import express from "express";
-import cors from "cors";
-import dotenv from "dotenv";
 import resumeRoutes from "./routers/resume.routes";
-dotenv.config();
-
 const app = express();
-app.use(cors());
-app.use(express.json());
-const PORT = process.env.PORT;
-app.use("/api/resume", resumeRoutes);
-
 app.get("/", (req, res) => {
-  res.send("Backend is Running ");
+  res.send("Backend Server Started");
 });
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+app.post("/upload", (req, res) => {
+  console.log("POST HIT");
+  res.json({
+    success: true,
+  });
+});
+app.use("/api/resume", resumeRoutes);
+app.listen(5052, () => {
+  console.log("Server Started");
 });
