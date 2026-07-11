@@ -1,36 +1,34 @@
 import type { Metadata } from "next";
-import { Inter, Plus_Jakarta_Sans } from "next/font/google";
+import { Plus_Jakarta_Sans, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
-
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-sans",
-  display: "swap",
-});
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
-  variable: "--font-display",
-  weight: ["500", "600", "700", "800"],
+  variable: "--font-jakarta",
+  display: "swap",
+});
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const jbmono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-jbmono",
   display: "swap",
 });
 
 export const metadata: Metadata = {
   title: "Apna Interview",
-  description:
-    "Analyze your resume, improve your ATS score, close skill gaps, and practice real interview questions — all powered by AI.",
+  description: "Analyze your resume, close skill gaps, and practice with AI-generated interview questions.",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body
-        className={`${inter.variable} ${jakarta.variable} font-sans antialiased bg-white text-slate-900`}
-      >
+      <body className={`${jakarta.variable} ${inter.variable} ${jbmono.variable} antialiased`}>
         {children}
       </body>
     </html>
