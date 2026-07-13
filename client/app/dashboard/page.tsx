@@ -3,6 +3,7 @@ import { useEffect,useState } from "react";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "../firebase/firebase";
 import { useRouter } from "next/navigation";
+import ResumeUpload from "@/components/dashboard/ResumeUpload";
 export default function Dashboard() {
   const [checkingAuth, setCheckingAuth] = useState(true);
   const router = useRouter();
@@ -33,28 +34,56 @@ export default function Dashboard() {
     );
   }
   return (
-    <main className="min-h-screen bg-gray-100">
-      <div className="bg-white shadow px-8 py-5 flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-blue-600">Apna Interview</h1>
+  <main className="min-h-screen bg-slate-100">
+    <header className="bg-white shadow-sm">
+      <div className="max-w-7xl mx-auto px-8 py-5 flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-bold text-blue-600">
+            Apna Interview
+          </h1>
+          <p className="text-sm text-gray-500">
+            AI Resume Analyzer Dashboard
+          </p>
+        </div>
+
         <button
           onClick={handleLogout}
-          className="bg-red-500 text-white px-5 py-2 rounded-lg cursor-pointer"
+          className="bg-red-500 hover:bg-red-600 text-white px-5 py-2 rounded-lg transition"
         >
           Logout
         </button>
       </div>
-      <div className="p-10">
-        <h2 className="text-3xl font-bold">Welcome</h2>
-        <p className="text-gray-500 mt-2">AI Resume Analyzer Dashboard</p>
-        <div className="grid grid-cols-4 gap-6 mt-10">
-          <div className="bg-white rounded-xl shadow p-6">Resume Analyzer</div>
-          <div className="bg-white rounded-xl shadow p-6">ATS Reports</div>
-          <div className="bg-white rounded-xl shadow p-6">
-            Interview Questions
-          </div>
-          <div className="bg-white rounded-xl shadow p-6">Profile</div>
+    </header>
+    <div className="max-w-6xl mx-auto p-8">
+      <ResumeUpload />
+      <div className="grid md:grid-cols-2 gap-6 mt-10">
+        <div className="bg-white rounded-xl shadow p-6">
+          <h3 className="font-semibold text-lg">
+            ATS Score
+          </h3>
+        </div>
+        <div className="bg-white rounded-xl shadow p-6">
+          <h3 className="font-semibold text-lg">
+            Summary
+          </h3>
+        </div>
+        <div className="bg-white rounded-xl shadow p-6">
+          <h3 className="font-semibold text-lg">
+            Strengths
+          </h3>
+        </div>
+        <div className="bg-white rounded-xl shadow p-6">
+          <h3 className="font-semibold text-lg">
+            Missing Skills
+          </h3>
         </div>
       </div>
-    </main>
-  );
+      <div className="mt-6 bg-white rounded-xl shadow p-6">
+        <h3 className="font-semibold text-lg">
+          Suggestions
+        </h3>
+      </div>
+    </div>
+  </main>
+);
 }
