@@ -40,7 +40,7 @@ export default function Dashboard() {
   return (
     <main className="min-h-screen bg-[#f8f9fc] text-slate-900">
       <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/90 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto px-6 md:px-8 py-4 flex justify-between items-center">
+        <div className="max-w-[1400px] mx-auto px-6 lg:px-10 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-600 to-violet-600 flex items-center justify-center text-white font-bold">
               A
@@ -65,7 +65,7 @@ export default function Dashboard() {
         </div>
       </header>
 
-      <div className="max-w-6xl mx-auto px-6 md:px-8 py-10">
+      <div className="max-w-[1400px] mx-auto px-6 lg:px-10 py-10">
         <div className="mb-8">
           <p className="text-sm font-medium text-blue-600">Resume Analysis</p>
 
