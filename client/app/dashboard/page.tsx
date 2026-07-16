@@ -5,9 +5,11 @@ import { auth } from "../firebase/firebase";
 import { useRouter } from "next/navigation";
 import ResumeUpload from "@/components/dashboard/ResumeUpload";
 import { Analysis } from "@/types/analysis";
+import JobMatch from "@/components/dashboard/JobMatch";
 export default function Dashboard() {
   const [checkingAuth, setCheckingAuth] = useState(true);
-  const [analysis, setAnalysis] = useState<Analysis | null>(null);
+  const [resumeAnalysis, setResumeAnalysis] = useState<Analysis | null>(null);
+  const [resumeText, setResumeText] = useState("");
   const router = useRouter();
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -77,9 +79,12 @@ export default function Dashboard() {
           </p>
         </div>
 
-        <ResumeUpload onAnalysisComplete={setAnalysis} />
+        <ResumeUpload
+          onAnalysisComplete={setResumeAnalysis}
+          onResumeTextExtracted={setResumeText}
+        />
 
-        {analysis && (
+        {resumeAnalysis && (
           <div className="mt-10 space-y-6">
             <div className="grid lg:grid-cols-[320px_1fr] gap-6">
               <div className="bg-white border border-slate-200 rounded-xl p-7 shadow-sm flex flex-col items-center justify-center">
@@ -90,12 +95,12 @@ export default function Dashboard() {
                 <div
                   className="relative w-40 h-40 rounded-full flex items-center justify-center"
                   style={{
-                    background: `conic-gradient(#4f46e5 ${analysis.atsScore * 3.6}deg, #e9eaf0 0deg)`,
+                    background: `conic-gradient(#4f46e5 ${resumeAnalysis.atsScore * 3.6}deg, #e9eaf0 0deg)`,
                   }}
                 >
                   <div className="absolute w-[124px] h-[124px] bg-white rounded-full flex flex-col items-center justify-center">
                     <span className="text-4xl font-bold text-slate-900">
-                      {analysis.atsScore}
+                      {resumeAnalysis.atsScore}
                     </span>
 
                     <span className="text-xs text-slate-500 mt-1">
@@ -106,15 +111,15 @@ export default function Dashboard() {
 
                 <div className="mt-5 text-center">
                   <p className="font-semibold text-slate-900">
-                    {analysis.atsScore >= 80
-                      ? "Strong ATS match"
-                      : analysis.atsScore >= 60
-                        ? "Good ATS match"
+                    {resumeAnalysis.atsScore >= 80
+                      ? "Strong Resume match"
+                      : resumeAnalysis.atsScore >= 60
+                        ? "Good Resume match"
                         : "Needs improvement"}
                   </p>
 
                   <p className="text-sm text-slate-500 mt-1">
-                    Your resume scored {analysis.atsScore} out of 100
+                    Your resume scored {resumeAnalysis.atsScore} out of 100
                   </p>
                 </div>
               </div>
@@ -129,31 +134,29 @@ export default function Dashboard() {
                 </div>
 
                 <p className="text-slate-600 mt-5 leading-7">
-                  {analysis.summary}
+                  {resumeAnalysis.summary}
                 </p>
               </div>
             </div>
-
             <div className="grid md:grid-cols-2 gap-6">
               <div className="bg-white border border-slate-200 rounded-xl p-7 shadow-sm">
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-semibold">Strengths</h3>
 
                   <span className="text-xs font-medium bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full">
-                    {analysis.strengths.length} Found
+                    {resumeAnalysis.strengths.length} Found
                   </span>
                 </div>
 
                 <ul className="mt-6 space-y-4">
-                  {analysis.strengths.map((strength, index) => (
+                  {resumeAnalysis.strengths.map((strength, index) => (
                     <li
                       key={index}
                       className="flex items-start gap-3 text-sm text-slate-600 leading-6"
                     >
-                      <span className="mt-0.5 flex-shrink-0 w-5 h-5 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs font-bold">
+                      <span className="mt-0.5 shrink-0 w-5 h-5 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs font-bold">
                         ✓
                       </span>
-
                       <span>{strength}</span>
                     </li>
                   ))}
@@ -162,28 +165,49 @@ export default function Dashboard() {
 
               <div className="bg-white border border-slate-200 rounded-xl p-7 shadow-sm">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold">Skill Gaps</h3>
+                  <h3 className="text-lg font-semibold">
+                    Areas for Improvement
+                  </h3>
 
                   <span className="text-xs font-medium bg-amber-50 text-amber-600 px-3 py-1 rounded-full">
-                    {analysis.missingSkills.length} Missing
+                    {resumeAnalysis.weaknesses.length} Found
                   </span>
                 </div>
 
                 <ul className="mt-6 space-y-4">
-                  {analysis.missingSkills.map((skill, index) => (
+                  {resumeAnalysis.weaknesses.map((weakness, index) => (
                     <li
                       key={index}
                       className="flex items-start gap-3 text-sm text-slate-600 leading-6"
                     >
-                      <span className="mt-2 flex-shrink-0 w-2 h-2 rounded-full bg-amber-500" />
-
-                      <span>{skill}</span>
+                      <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-amber-500" />
+                      <span>{weakness}</span>
                     </li>
                   ))}
                 </ul>
               </div>
             </div>
+            <div className="bg-white border border-slate-200 rounded-xl p-7 shadow-sm">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold">Missing Sections</h3>
 
+                <span className="text-xs font-medium bg-violet-50 text-violet-600 px-3 py-1 rounded-full">
+                  {resumeAnalysis.missingSections.length} Missing
+                </span>
+              </div>
+
+              <ul className="mt-6 space-y-4">
+                {resumeAnalysis.missingSections.map((section, index) => (
+                  <li
+                    key={index}
+                    className="flex items-start gap-3 text-sm text-slate-600 leading-6"
+                  >
+                    <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-violet-500" />
+                    <span>{section}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>{" "}
             <div className="bg-white border border-slate-200 rounded-xl p-7 shadow-sm">
               <div>
                 <h3 className="text-lg font-semibold">Recommendations</h3>
@@ -194,7 +218,7 @@ export default function Dashboard() {
               </div>
 
               <div className="mt-6 divide-y divide-slate-100">
-                {analysis.suggestions.map((suggestion, index) => (
+                {resumeAnalysis.suggestions.map((suggestion, index) => (
                   <div
                     key={index}
                     className="flex items-start gap-4 py-5 first:pt-0 last:pb-0"
@@ -210,6 +234,7 @@ export default function Dashboard() {
                 ))}
               </div>
             </div>
+            <JobMatch resumeText={resumeText} />
           </div>
         )}
       </div>

@@ -5,10 +5,11 @@ import { Analysis } from "@/types/analysis";
 
 interface ResumeUploadProps {
   onAnalysisComplete: (analysis: Analysis) => void;
+  onResumeTextExtracted: (resumeText: string) => void;
 }
 
 export default function ResumeUpload({
-  onAnalysisComplete,
+  onAnalysisComplete,onResumeTextExtracted
 }: ResumeUploadProps) {
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
@@ -35,6 +36,7 @@ export default function ResumeUpload({
       }
 
       onAnalysisComplete(data.analysis);
+      onResumeTextExtracted(data.resumeText);
     } catch (error) {
       console.error(error);
     } finally {

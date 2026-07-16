@@ -2,6 +2,7 @@ export interface Analysis {
   atsScore: number;
   summary: string;
   strengths: string[];
-  missingSkills: string[];
+  weaknesses: string[];
+  missingSections: string[];
   suggestions: string[];
 }
