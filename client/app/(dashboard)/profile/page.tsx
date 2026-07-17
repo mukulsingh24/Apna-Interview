@@ -2,9 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { onAuthStateChanged, User } from "firebase/auth";
-import { auth } from "../firebase/firebase";
+import { auth } from "@/app/firebase/firebase";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 
 export default function Profile() {
   const [user, setUser] = useState<User | null>(null);
@@ -104,28 +103,6 @@ export default function Profile() {
   };
   return (
     <main className="min-h-screen bg-[#f8f9fc] text-slate-900">
-      <header className="border-b border-slate-200 bg-white">
-        <div className="max-w-[1400px] mx-auto px-6 lg:px-10 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-600 to-violet-600 flex items-center justify-center text-white font-bold">
-              A
-            </div>
-
-            <div>
-              <h1 className="text-lg font-bold">Apna Interview</h1>
-              <p className="text-xs text-slate-500">User Profile</p>
-            </div>
-          </Link>
-
-          <Link
-            href="/dashboard"
-            className="rounded-lg border border-slate-200 bg-white px-5 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-          >
-            Back to Dashboard
-          </Link>
-        </div>
-      </header>
-
       <div className="max-w-4xl mx-auto px-6 py-12">
         <div className="mb-8">
           <p className="text-sm font-medium text-indigo-600">Your Profile</p>

@@ -1,98 +1,33 @@
 "use client";
-import { useEffect, useState } from "react";
-import { onAuthStateChanged, signOut } from "firebase/auth";
-import { auth } from "../firebase/firebase";
-import { useRouter } from "next/navigation";
+
+import { useState } from "react";
 import ResumeUpload from "@/components/dashboard/ResumeUpload";
 import { Analysis } from "@/types/analysis";
-import { FaRegUserCircle } from "react-icons/fa";
-import JobMatch from "@/components/dashboard/JobMatch";
-import Link from "next/link";
-export default function Dashboard() {
-  const [checkingAuth, setCheckingAuth] = useState(true);
-  const [resumeAnalysis, setResumeAnalysis] = useState<Analysis | null>(null);
-  const [resumeText, setResumeText] = useState("");
-  const router = useRouter();
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        router.push("/login");
-      } else {
-        setCheckingAuth(false);
-      }
-    });
 
-    return () => unsubscribe();
-  }, [router]);
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      router.replace("/login");
-    } catch (err) {
-      console.error(err);
-    }
-  };
-  if (checkingAuth) {
-    return (
-      <div className="min-h-screen flex justify-center items-center">
-        Loading
-      </div>
-    );
-  }
+export default function ResumeAnalysisPage() {
+  const [resumeAnalysis, setResumeAnalysis] = useState<Analysis | null>(null);
+
   return (
     <main className="min-h-screen bg-[#f8f9fc] text-slate-900">
-      <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/90 backdrop-blur-md">
-        <div className="max-w-[1400px] mx-auto px-6 lg:px-10 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-600 to-violet-600 flex items-center justify-center text-white font-bold">
-              A
-            </div>
-
-            <div>
-              <h1 className="text-lg font-bold text-slate-900">
-                Apna Interview
-              </h1>
-              <p className="text-xs text-slate-500">
-                Resume Analyzer Dashboard
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-5">
-  <Link
-    href="/profile"
-    className="flex items-center justify-center text-slate-600 hover:text-indigo-600 transition-colors"
-    title="Profile"
-  >
-    <FaRegUserCircle size={30} />
-  </Link>
-
-  <button
-    onClick={handleLogout}
-    className="px-5 py-2 rounded-lg border border-slate-200 bg-white text-sm font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition cursor-pointer"
-  >
-    Logout
-  </button>
-</div>
-        </div>
-      </header>
-
       <div className="max-w-[1400px] mx-auto px-6 lg:px-10 py-10">
         <div className="mb-8">
-          <p className="text-sm font-medium text-blue-600">Resume Analysis</p>
+          <p className="text-sm font-medium text-blue-600">
+            Resume Analysis
+          </p>
 
           <h2 className="text-3xl font-bold tracking-tight mt-1">
             Analyze your resume
           </h2>
 
           <p className="text-slate-500 mt-2">
-            Upload your resume to get your ATS score, strengths, skill gaps, and
-            personalized suggestions.
+            Upload your resume to get your resume score, strengths, areas for
+            improvement, missing sections, and personalized suggestions.
           </p>
         </div>
 
         <ResumeUpload
           onAnalysisComplete={setResumeAnalysis}
-          onResumeTextExtracted={setResumeText}
+          onResumeTextExtracted={() => {}}
         />
 
         {resumeAnalysis && (
@@ -106,7 +41,10 @@ export default function Dashboard() {
                 <div
                   className="relative w-40 h-40 rounded-full flex items-center justify-center"
                   style={{
-                    background: `conic-gradient(#4f46e5 ${resumeAnalysis.atsScore * 3.6}deg, #e9eaf0 0deg)`,
+                    background: `conic-gradient(
+                      #4f46e5 ${resumeAnalysis.atsScore * 3.6}deg,
+                      #e9eaf0 0deg
+                    )`,
                   }}
                 >
                   <div className="absolute w-[124px] h-[124px] bg-white rounded-full flex flex-col items-center justify-center">
@@ -123,10 +61,10 @@ export default function Dashboard() {
                 <div className="mt-5 text-center">
                   <p className="font-semibold text-slate-900">
                     {resumeAnalysis.atsScore >= 80
-                      ? "Strong Resume match"
+                      ? "Strong Resume"
                       : resumeAnalysis.atsScore >= 60
-                        ? "Good Resume match"
-                        : "Needs improvement"}
+                        ? "Good Resume"
+                        : "Needs Improvement"}
                   </p>
 
                   <p className="text-sm text-slate-500 mt-1">
@@ -141,7 +79,9 @@ export default function Dashboard() {
                     ✦
                   </div>
 
-                  <h3 className="text-lg font-semibold">Analysis Summary</h3>
+                  <h3 className="text-lg font-semibold">
+                    Analysis Summary
+                  </h3>
                 </div>
 
                 <p className="text-slate-600 mt-5 leading-7">
@@ -149,10 +89,14 @@ export default function Dashboard() {
                 </p>
               </div>
             </div>
+
             <div className="grid md:grid-cols-2 gap-6">
+              {/* Strengths */}
               <div className="bg-white border border-slate-200 rounded-xl p-7 shadow-sm">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold">Strengths</h3>
+                  <h3 className="text-lg font-semibold">
+                    Strengths
+                  </h3>
 
                   <span className="text-xs font-medium bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full">
                     {resumeAnalysis.strengths.length} Found
@@ -168,6 +112,7 @@ export default function Dashboard() {
                       <span className="mt-0.5 shrink-0 w-5 h-5 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs font-bold">
                         ✓
                       </span>
+
                       <span>{strength}</span>
                     </li>
                   ))}
@@ -192,6 +137,7 @@ export default function Dashboard() {
                       className="flex items-start gap-3 text-sm text-slate-600 leading-6"
                     >
                       <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-amber-500" />
+
                       <span>{weakness}</span>
                     </li>
                   ))}
@@ -200,13 +146,13 @@ export default function Dashboard() {
             </div>
             <div className="bg-white border border-slate-200 rounded-xl p-7 shadow-sm">
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold">Missing Sections</h3>
-
+                <h3 className="text-lg font-semibold">
+                  Missing Sections
+                </h3>
                 <span className="text-xs font-medium bg-violet-50 text-violet-600 px-3 py-1 rounded-full">
                   {resumeAnalysis.missingSections.length} Missing
                 </span>
               </div>
-
               <ul className="mt-6 space-y-4">
                 {resumeAnalysis.missingSections.map((section, index) => (
                   <li
@@ -214,14 +160,17 @@ export default function Dashboard() {
                     className="flex items-start gap-3 text-sm text-slate-600 leading-6"
                   >
                     <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-violet-500" />
+
                     <span>{section}</span>
                   </li>
                 ))}
               </ul>
-            </div>{" "}
+            </div>
             <div className="bg-white border border-slate-200 rounded-xl p-7 shadow-sm">
               <div>
-                <h3 className="text-lg font-semibold">Recommendations</h3>
+                <h3 className="text-lg font-semibold">
+                  Recommendations
+                </h3>
 
                 <p className="text-sm text-slate-500 mt-1">
                   Actionable improvements to strengthen your resume
@@ -245,7 +194,6 @@ export default function Dashboard() {
                 ))}
               </div>
             </div>
-            <JobMatch resumeText={resumeText} />
           </div>
         )}
       </div>

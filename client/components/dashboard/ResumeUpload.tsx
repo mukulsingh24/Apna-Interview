@@ -1,5 +1,5 @@
 "use client";
-
+import { auth } from "@/app/firebase/firebase";
 import { useRef, useState } from "react";
 import { Analysis } from "@/types/analysis";
 
@@ -9,7 +9,8 @@ interface ResumeUploadProps {
 }
 
 export default function ResumeUpload({
-  onAnalysisComplete,onResumeTextExtracted
+  onAnalysisComplete,
+  onResumeTextExtracted,
 }: ResumeUploadProps) {
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
@@ -35,15 +36,48 @@ export default function ResumeUpload({
         throw new Error(data.error || "Failed to analyze resume");
       }
 
-      onAnalysisComplete(data.analysis);
+      const analysis = data.analysis;
+
+      onAnalysisComplete(analysis);
       onResumeTextExtracted(data.resumeText);
+
+      const currentUser = auth.currentUser;
+
+      if (currentUser) {
+        const saveResponse = await fetch(
+          "http://localhost:5050/api/resume-analysis-history",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              firebaseUid: currentUser.uid,
+              fileName: file.name,
+              atsScore: analysis.atsScore,
+              summary: analysis.summary,
+              strengths: analysis.strengths,
+              weaknesses: analysis.weaknesses,
+              missingSections: analysis.missingSections,
+              suggestions: analysis.suggestions,
+            }),
+          },
+        );
+
+        const saveData = await saveResponse.json();
+
+        if (!saveResponse.ok) {
+          throw new Error(saveData.message || "Failed to save resume analysis");
+        }
+
+        console.log("Resume analysis saved:", saveData);
+      }
     } catch (error) {
       console.error(error);
     } finally {
       setLoading(false);
     }
   };
-
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
 

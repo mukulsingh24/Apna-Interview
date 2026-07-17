@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import resumeRoutes from "./routers/resume.routes";
 import cors from "cors";
 import profileRoutes from "./routers/profile.routes";
+import resumeAnalysisRoutes from "./routers/resumeAnalysis.routes";
 dotenv.config();
 const app = express();
 app.use(express.json());
@@ -12,6 +13,7 @@ app.get("/", (req, res) => {
 });
 app.use("/api/resume", resumeRoutes);
 app.use("/api/profile", profileRoutes);
-app.listen(5050, () => {
+app.use("/api/resume-analysis-history", resumeAnalysisRoutes);
+app.listen(5051, () => {
   console.log("Server Started");
 });
