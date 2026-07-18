@@ -3,11 +3,20 @@ import {
   saveProfile,
   getProfile,
 } from "../controllers/profile.controller";
+import { verifyFirebaseToken } from "../middleware/auth.middleware";
 
 const router = express.Router();
 
-router.post("/", saveProfile);
+router.get(
+  "/",
+  verifyFirebaseToken,
+  getProfile,
+);
 
-router.get("/:firebaseUid", getProfile);
+router.put(
+  "/",
+  verifyFirebaseToken,
+  saveProfile,
+);
 
 export default router;

@@ -27,7 +27,7 @@ export default function JobMatch({ resumeText }: JobMatchProps) {
     const token = await user.getIdToken();
 
     const response = await fetch(
-      "http://localhost:5050/api/job-match/analyze",
+      `${process.env.NEXT_PUBLIC_API_URL}/api/job-match/analyze`,
       {
         method: "POST",
         headers: {

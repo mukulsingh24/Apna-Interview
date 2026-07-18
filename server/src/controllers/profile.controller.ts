@@ -1,10 +1,20 @@
-import { Request, Response } from "express";
-import prisma from "../lib/prisma";
+import { Response } from "express";
+import prisma from "../config/prisma";
+import { AuthRequest } from "../middleware/auth.middleware";
 
-export const saveProfile = async (req: Request, res: Response) => {
+export const saveProfile = async (
+  req: AuthRequest,
+  res: Response,
+) => {
   try {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized.",
+      });
+    }
+
     const {
-      firebaseUid,
       fullName,
       targetRole,
       experienceLevel,
@@ -12,33 +22,31 @@ export const saveProfile = async (req: Request, res: Response) => {
       skills,
     } = req.body;
 
-    if (!firebaseUid || !fullName) {
+    if (!fullName) {
       return res.status(400).json({
         success: false,
-        message: "Firebase UID and full name are required.",
+        message: "Full name is required.",
       });
     }
 
     const profile = await prisma.profile.upsert({
       where: {
-        firebaseUid,
+        firebaseUid: req.user.uid,
       },
-
       update: {
         fullName,
         targetRole,
         experienceLevel,
         education,
-        skills,
+        skills: Array.isArray(skills) ? skills : [],
       },
-
       create: {
-        firebaseUid,
+        firebaseUid: req.user.uid,
         fullName,
         targetRole,
         experienceLevel,
         education,
-        skills,
+        skills: Array.isArray(skills) ? skills : [],
       },
     });
 
@@ -48,7 +56,7 @@ export const saveProfile = async (req: Request, res: Response) => {
       profile,
     });
   } catch (error) {
-    console.error("Profile save error:", error);
+    console.error("PROFILE SAVE ERROR:", error);
 
     return res.status(500).json({
       success: false,
@@ -57,20 +65,28 @@ export const saveProfile = async (req: Request, res: Response) => {
   }
 };
 
-export const getProfile = async (req: Request, res: Response) => {
+export const getProfile = async (
+  req: AuthRequest,
+  res: Response,
+) => {
   try {
-    const { firebaseUid } = req.params;
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized.",
+      });
+    }
 
     const profile = await prisma.profile.findUnique({
       where: {
-        firebaseUid,
+        firebaseUid: req.user.uid,
       },
     });
 
     if (!profile) {
-      return res.status(404).json({
-        success: false,
-        message: "Profile not found.",
+      return res.status(200).json({
+        success: true,
+        profile: null,
       });
     }
 
@@ -79,7 +95,7 @@ export const getProfile = async (req: Request, res: Response) => {
       profile,
     });
   } catch (error) {
-    console.error(error);
+    console.error("PROFILE FETCH ERROR:", error);
 
     return res.status(500).json({
       success: false,

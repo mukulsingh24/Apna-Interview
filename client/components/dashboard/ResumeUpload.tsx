@@ -35,7 +35,7 @@ export default function ResumeUpload({
     const token = await user.getIdToken();
 
     const response = await fetch(
-      "http://localhost:5050/api/resume/upload",
+      `${process.env.NEXT_PUBLIC_API_URL}/api/resume/upload`,
       {
         method: "POST",
         headers: {

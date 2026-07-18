@@ -39,21 +39,21 @@ export default function Dashboard() {
 
         const [resumeResponse, jobMatchResponse, interviewResponse] =
           await Promise.all([
-            fetch("http://localhost:5050/api/resume/history", {
+            fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/resume/history`, {
               method: "GET",
               headers: {
                 Authorization: `Bearer ${token}`,
               },
             }),
 
-            fetch("http://localhost:5050/api/job-match/history", {
+            fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/job-match/history`, {
               method: "GET",
               headers: {
                 Authorization: `Bearer ${token}`,
               },
             }),
 
-            fetch("http://localhost:5050/api/interview/history", {
+            fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/interview/history`, {
               method: "GET",
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -139,7 +139,7 @@ export default function Dashboard() {
 
   return (
     <main className="min-h-screen bg-[#f8f9fc] text-slate-900">
-      <div className="mx-auto max-w-[1400px] px-6 py-10 lg:px-10">
+      <div className="mx-auto max-w-[1400px] px-4 py-8 sm:px-6 sm:py-10 lg:px-10">
         <section className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-sm font-medium text-indigo-600">
@@ -356,7 +356,7 @@ export default function Dashboard() {
 
         <section className="mt-10">
           <div className="rounded-2xl border border-slate-200 bg-white p-7 shadow-sm">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h2 className="text-lg font-semibold text-slate-900">
                   Recent Activity
@@ -369,9 +369,12 @@ export default function Dashboard() {
               </div>
 
               {recentActivity.length > 0 && (
-                <button className="cursor-pointer text-sm font-medium text-indigo-600 transition hover:text-indigo-700">
+                <Link
+                  href="/history"
+                  className="text-sm font-medium text-indigo-600 transition hover:text-indigo-700"
+                >
                   View all activity →
-                </button>
+                </Link>
               )}
             </div>
 
@@ -380,24 +383,24 @@ export default function Dashboard() {
                 {recentActivity.map((activity) => (
                   <div
                     key={activity.id}
-                    className="flex items-center justify-between py-5 first:pt-0 last:pb-0"
+                    className="flex flex-col gap-4 py-5 first:pt-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between"
                   >
-                    <div className="flex items-center gap-4">
+                    <div className="flex min-w-0 items-center gap-4">
                       <div
-  className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-lg ${
-    activity.type === "resume"
-      ? "bg-indigo-50"
-      : activity.type === "job"
-        ? "bg-emerald-50"
-        : "bg-violet-50"
-  }`}
->
-  {activity.type === "resume"
-    ? "📄"
-    : activity.type === "job"
-      ? "🎯"
-      : "💬"}
-</div>
+                        className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-lg ${
+                          activity.type === "resume"
+                            ? "bg-indigo-50"
+                            : activity.type === "job"
+                              ? "bg-emerald-50"
+                              : "bg-violet-50"
+                        }`}
+                      >
+                        {activity.type === "resume"
+                          ? "📄"
+                          : activity.type === "job"
+                            ? "🎯"
+                            : "💬"}
+                      </div>
 
                       <div>
                         <p className="font-medium text-slate-900">
@@ -410,18 +413,18 @@ export default function Dashboard() {
                       </div>
                     </div>
 
-                    <div className="text-right">
+                    <div className="pl-15 text-left sm:pl-0 sm:text-right">
                       <span
-  className={`inline-flex rounded-full px-3 py-1 text-sm font-medium ${
-    activity.type === "resume"
-      ? "bg-indigo-50 text-indigo-700"
-      : activity.type === "job"
-        ? "bg-emerald-50 text-emerald-700"
-        : "bg-violet-50 text-violet-700"
-  }`}
->
-  Score {activity.score}/100
-</span>
+                        className={`inline-flex rounded-full px-3 py-1 text-sm font-medium ${
+                          activity.type === "resume"
+                            ? "bg-indigo-50 text-indigo-700"
+                            : activity.type === "job"
+                              ? "bg-emerald-50 text-emerald-700"
+                              : "bg-violet-50 text-violet-700"
+                        }`}
+                      >
+                        Score {activity.score}/100
+                      </span>
 
                       {activity.createdAt && (
                         <p className="mt-2 text-xs text-slate-400">

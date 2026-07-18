@@ -88,7 +88,7 @@ const [interviewResult, setInterviewResult] =
     const token = await user.getIdToken();
 
     const response = await fetch(
-      `http://localhost:5050/api/interview/${session.id}/complete`,
+      `${process.env.NEXT_PUBLIC_API_URL}/api/interview/${session.id}/complete`,
       {
         method: "POST",
         headers: {
@@ -144,7 +144,7 @@ const [interviewResult, setInterviewResult] =
       const token = await user.getIdToken();
 
       const response = await fetch(
-        "http://localhost:5050/api/interview/start",
+        `${process.env.NEXT_PUBLIC_API_URL}/api/interview/start`,
         {
           method: "POST",
           headers: {
