@@ -2,149 +2,149 @@
 
 import { useEffect, useState } from "react";
 import { auth } from "@/app/firebase/firebase";
+import { onAuthStateChanged } from "firebase/auth";
+import Link from "next/link";
 
-export default function ProfilePage() {
-  const [fullName, setFullName] = useState("");
-  const [targetRole, setTargetRole] = useState("");
-  const [experienceLevel, setExperienceLevel] = useState("");
-  const [education, setEducation] = useState("");
-  const [skills, setSkills] = useState("");
-  const [email, setEmail] = useState("");
+type ResumeActivity = {
+  id: string;
+  fileName: string;
+  atsScore: number;
+  createdAt: string;
+};
 
+type JobMatchActivity = {
+  id: string;
+  atsScore: number;
+  createdAt: string;
+};
+
+type InterviewActivity = {
+  id: string;
+  role?: string;
+  score?: number;
+  createdAt: string;
+};
+
+type Activity = {
+  id: string;
+  type: "resume" | "job" | "interview";
+  title: string;
+  subtitle: string;
+  score?: number;
+  createdAt: string;
+};
+
+export default function HistoryPage() {
+  const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const loadProfile = async () => {
-      try {
-        const user = auth.currentUser;
-
-        if (!user) {
-          setLoading(false);
-          return;
-        }
-
-        setEmail(user.email || "");
-
-        const token = await user.getIdToken();
-
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/profile`,
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          },
-        );
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(
-            data.message || "Failed to load profile.",
-          );
-        }
-
-        if (data.profile) {
-          setFullName(data.profile.fullName || "");
-          setTargetRole(data.profile.targetRole || "");
-          setExperienceLevel(
-            data.profile.experienceLevel || "",
-          );
-          setEducation(data.profile.education || "");
-
-          setSkills(
-            Array.isArray(data.profile.skills)
-              ? data.profile.skills.join(", ")
-              : "",
-          );
-        }
-      } catch (error) {
-        setError(
-          error instanceof Error
-            ? error.message
-            : "Failed to load profile.",
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadProfile();
-  }, []);
-
-  const handleSaveProfile = async () => {
-    if (!fullName.trim()) {
-      setError("Full name is required.");
-      return;
-    }
-
-    try {
-      setSaving(true);
-      setMessage("");
-      setError("");
-
-      const user = auth.currentUser;
-
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (!user) {
-        setError("You must be logged in.");
+        setLoading(false);
         return;
       }
 
-      const token = await user.getIdToken();
+      try {
+        const token = await user.getIdToken();
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/profile`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            fullName: fullName.trim(),
-            targetRole: targetRole.trim(),
-            experienceLevel,
-            education: education.trim(),
-            skills: skills
-              .split(",")
-              .map((skill) => skill.trim())
-              .filter(Boolean),
-          }),
-        },
-      );
+        const [resumeResponse, jobMatchResponse, interviewResponse] =
+          await Promise.all([
+            fetch(
+              `${process.env.NEXT_PUBLIC_API_URL}/api/resume/history`,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              },
+            ),
+            fetch(
+              `${process.env.NEXT_PUBLIC_API_URL}/api/job-match/history`,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              },
+            ),
+            fetch(
+              `${process.env.NEXT_PUBLIC_API_URL}/api/interview/history`,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              },
+            ),
+          ]);
 
-      const data = await response.json();
+        const resumeData = await resumeResponse.json();
+        const jobMatchData = await jobMatchResponse.json();
+        const interviewData = await interviewResponse.json();
 
-      if (!response.ok) {
-        throw new Error(
-          data.message || "Failed to save profile.",
+        const resumeActivities: Activity[] = (
+          resumeData.history || []
+        ).map((item: ResumeActivity) => ({
+          id: `resume-${item.id}`,
+          type: "resume",
+          title: "Resume Analyzed",
+          subtitle: item.fileName || "Resume",
+          score: item.atsScore,
+          createdAt: item.createdAt,
+        }));
+
+        const jobActivities: Activity[] = (
+          jobMatchData.history || []
+        ).map((item: JobMatchActivity) => ({
+          id: `job-${item.id}`,
+          type: "job",
+          title: "Job Match Analyzed",
+          subtitle: "Resume compared with job description",
+          score: item.atsScore,
+          createdAt: item.createdAt,
+        }));
+
+        const interviewActivities: Activity[] = (
+          interviewData.history || []
+        ).map((item: InterviewActivity) => ({
+          id: `interview-${item.id}`,
+          type: "interview",
+          title: "Interview Practice",
+          subtitle: item.role
+            ? `${item.role} interview`
+            : "Interview preparation session",
+          score: item.score,
+          createdAt: item.createdAt,
+        }));
+
+        const combinedActivities = [
+          ...resumeActivities,
+          ...jobActivities,
+          ...interviewActivities,
+        ].sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() -
+            new Date(a.createdAt).getTime(),
         );
-      }
 
-      setMessage("Profile saved successfully.");
-    } catch (error) {
-      setError(
-        error instanceof Error
-          ? error.message
-          : "Failed to save profile.",
-      );
-    } finally {
-      setSaving(false);
-    }
-  };
+        setActivities(combinedActivities);
+      } catch (error) {
+        console.error("Failed to fetch activity history:", error);
+        setError("Failed to load activity history.");
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   if (loading) {
     return (
       <main className="flex min-h-[80vh] items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <div className="h-7 w-7 animate-spin rounded-full border-2 border-indigo-200 border-t-indigo-600" />
-
           <p className="text-sm text-slate-500">
-            Loading profile...
+            Loading activity history...
           </p>
         </div>
       </main>
@@ -152,146 +152,116 @@ export default function ProfilePage() {
   }
 
   return (
-    <main className="px-6 py-10 lg:px-10">
-      <div className="mx-auto max-w-4xl">
+    <main className="px-4 py-8 sm:px-6 lg:px-10 lg:py-10">
+      <div className="mx-auto max-w-5xl">
         <div className="mb-8">
           <p className="text-sm font-medium text-indigo-600">
-            Your Profile
+            Your Activity
           </p>
 
           <h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-900">
-            Profile Settings
+            Activity History
           </h1>
 
           <p className="mt-2 text-slate-500">
-            Manage your professional information and career
-            preferences.
+            Track your resume analyses, job matches, and interview
+            preparation sessions.
           </p>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-          <div className="grid gap-6 md:grid-cols-2">
-            <div>
-              <label className="text-sm font-medium text-slate-700">
-                Full Name
-              </label>
+        {error && (
+          <div className="mb-6 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">
+            {error}
+          </div>
+        )}
 
-              <input
-                type="text"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                placeholder="Enter your full name"
-                className="mt-2 w-full rounded-lg border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
-              />
+        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+          {activities.length > 0 ? (
+            <div className="divide-y divide-slate-100">
+              {activities.map((activity) => (
+                <div
+                  key={activity.id}
+                  className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6"
+                >
+                  <div className="flex items-center gap-4">
+                    <div
+                      className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-lg ${
+                        activity.type === "resume"
+                          ? "bg-indigo-50"
+                          : activity.type === "job"
+                            ? "bg-emerald-50"
+                            : "bg-violet-50"
+                      }`}
+                    >
+                      {activity.type === "resume"
+                        ? "📄"
+                        : activity.type === "job"
+                          ? "🎯"
+                          : "💬"}
+                    </div>
+
+                    <div>
+                      <p className="font-medium text-slate-900">
+                        {activity.title}
+                      </p>
+
+                      <p className="mt-1 text-sm text-slate-500">
+                        {activity.subtitle}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="ml-15 flex items-center gap-4 sm:ml-0 sm:flex-col sm:items-end sm:gap-1">
+                    {activity.score !== undefined && (
+                      <span
+                        className={`inline-flex rounded-full px-3 py-1 text-sm font-medium ${
+                          activity.type === "resume"
+                            ? "bg-indigo-50 text-indigo-700"
+                            : activity.type === "job"
+                              ? "bg-emerald-50 text-emerald-700"
+                              : "bg-violet-50 text-violet-700"
+                        }`}
+                      >
+                        Score {activity.score}/100
+                      </span>
+                    )}
+
+                    <p className="text-xs text-slate-400">
+                      {new Date(
+                        activity.createdAt,
+                      ).toLocaleDateString("en-IN", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      })}
+                    </p>
+                  </div>
+                </div>
+              ))}
             </div>
+          ) : (
+            <div className="flex min-h-80 flex-col items-center justify-center px-6 text-center">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-50 text-xl">
+                📊
+              </div>
 
-            <div>
-              <label className="text-sm font-medium text-slate-700">
-                Email
-              </label>
+              <p className="mt-4 font-medium text-slate-800">
+                No activity yet
+              </p>
 
-              <input
-                type="email"
-                value={email}
-                disabled
-                className="mt-2 w-full cursor-not-allowed rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-500"
-              />
-            </div>
+              <p className="mt-2 max-w-md text-sm leading-6 text-slate-500">
+                Your resume analyses, job matches, and interview
+                preparation sessions will appear here.
+              </p>
 
-            <div>
-              <label className="text-sm font-medium text-slate-700">
-                Target Role
-              </label>
-
-              <input
-                type="text"
-                value={targetRole}
-                onChange={(e) => setTargetRole(e.target.value)}
-                placeholder="e.g. Software Engineer"
-                className="mt-2 w-full rounded-lg border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
-              />
-            </div>
-
-            <div>
-              <label className="text-sm font-medium text-slate-700">
-                Experience Level
-              </label>
-
-              <select
-                value={experienceLevel}
-                onChange={(e) =>
-                  setExperienceLevel(e.target.value)
-                }
-                className="mt-2 w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+              <Link
+                href="/resume-analysis"
+                className="mt-5 rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800"
               >
-                <option value="">Select experience level</option>
-                <option value="Student">Student</option>
-                <option value="Fresher">Fresher</option>
-                <option value="Junior">Junior</option>
-                <option value="Mid Level">Mid Level</option>
-                <option value="Senior">Senior</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="mt-6">
-            <label className="text-sm font-medium text-slate-700">
-              Education
-            </label>
-
-            <input
-              type="text"
-              value={education}
-              onChange={(e) => setEducation(e.target.value)}
-              placeholder="e.g. B.Tech in Artificial Intelligence and Machine Learning"
-              className="mt-2 w-full rounded-lg border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
-            />
-          </div>
-
-          <div className="mt-6">
-            <label className="text-sm font-medium text-slate-700">
-              Skills
-            </label>
-
-            <textarea
-              value={skills}
-              onChange={(e) => setSkills(e.target.value)}
-              rows={4}
-              placeholder="Java, Python, React, Next.js, Node.js, PostgreSQL"
-              className="mt-2 w-full resize-none rounded-lg border border-slate-300 px-4 py-3 text-sm leading-6 text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
-            />
-
-            <p className="mt-2 text-xs text-slate-400">
-              Separate each skill with a comma.
-            </p>
-          </div>
-
-          {error && (
-            <div className="mt-6 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">
-              {error}
+                Analyze your resume
+              </Link>
             </div>
           )}
-
-          {message && (
-            <div className="mt-6 rounded-lg bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-              {message}
-            </div>
-          )}
-
-          <button
-            onClick={handleSaveProfile}
-            disabled={saving || !fullName.trim()}
-            className="mt-8 flex w-full cursor-pointer items-center justify-center rounded-lg bg-slate-900 py-3 font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
-          >
-            {saving ? (
-              <span className="flex items-center gap-3">
-                <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                Saving Profile...
-              </span>
-            ) : (
-              "Save Profile"
-            )}
-          </button>
         </div>
       </div>
     </main>
