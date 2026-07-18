@@ -5,6 +5,7 @@ import { HiOutlineMenu, HiOutlineX } from "react-icons/hi";
 const navLinks = [
   { label: "Features", href: "#features" },
   { label: "How It Works", href: "#how-it-works" },
+  { label: "What's Next", href: "#upcoming-features" },
   { label: "Contact", href: "#contact" },
 ];
 export default function Navbar() {

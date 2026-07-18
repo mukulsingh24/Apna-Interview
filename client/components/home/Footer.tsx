@@ -7,7 +7,7 @@ const quickLinks = [
 ];
 export default function Footer() {
   return (
-    <footer className="border-t border-slate-200 bg-white">
+    <footer id="contact" className="border-t border-slate-200 bg-white">
       <div className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
         <div className="grid grid-cols-2 gap-10 sm:grid-cols-4">
           <div className="col-span-2 sm:col-span-1">
