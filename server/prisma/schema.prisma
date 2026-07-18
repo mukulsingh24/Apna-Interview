@@ -46,3 +46,19 @@ model JobMatchAnalysis {
   suggestions      Json
   createdAt        DateTime @default(now())
 }
+
+model InterviewSession {
+  id              Int      @id @default(autoincrement())
+  firebaseUid     String
+  targetRole      String
+  difficulty      String
+  interviewType   String
+  totalQuestions  Int
+  overallScore    Int?
+  questions       Json
+  answers         Json?
+  feedback        Json?
+  status          String   @default("IN_PROGRESS")
+  createdAt       DateTime @default(now())
+  completedAt     DateTime?
+}

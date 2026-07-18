@@ -5,6 +5,7 @@ import cors from "cors";
 import profileRoutes from "./routers/profile.routes";
 import resumeAnalysisRoutes from "./routers/resumeAnalysis.routes";
 import jobMatchRoutes from "./routers/jobMatch.routes";
+import interviewRoutes from "./routers/interview.routes";
 dotenv.config();
 const app = express();
 app.use(express.json());
@@ -16,6 +17,7 @@ app.use("/api/resume", resumeRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/resume-analysis-history", resumeAnalysisRoutes);
 app.use("/api/job-match", jobMatchRoutes);
+app.use("/api/interview", interviewRoutes);
 app.listen(5050, () => {
   console.log("Server Started");
 });

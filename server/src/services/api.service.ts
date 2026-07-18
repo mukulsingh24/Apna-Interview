@@ -223,3 +223,185 @@ ${jobDescription}
 
   return JSON.parse(content);
 };
+
+
+export const GenerateInterviewQuestions = async (
+  targetRole: string,
+  difficulty: string,
+  interviewType: string,
+  totalQuestions: number,
+) => {
+  const completion = await groq.chat.completions.create({
+    model: "llama-3.3-70b-versatile",
+    messages: [
+      {
+        role: "system",
+        content: `
+You are an expert technical interviewer.
+
+Generate interview questions for a candidate based on the provided role,
+difficulty level, and interview type.
+
+Rules:
+
+- Generate exactly the requested number of questions.
+- Questions must be relevant to the target role.
+- Adjust question complexity according to the difficulty level.
+- Avoid duplicate or overly similar questions.
+- For Technical interviews, focus on technical concepts, practical scenarios,
+  debugging, architecture, and problem-solving.
+- For Behavioral interviews, focus on teamwork, communication, challenges,
+  decision-making, and professional situations.
+- For Mixed interviews, include both technical and behavioral questions.
+- Do not provide answers or hints.
+
+Return ONLY valid JSON.
+
+JSON schema:
+
+{
+  "questions": [
+    {
+      "id": number,
+      "question": string
+    }
+  ]
+}
+
+Do not include markdown.
+Do not include any explanation outside the JSON.
+`,
+      },
+      {
+        role: "user",
+        content: `
+Target Role: ${targetRole}
+Difficulty: ${difficulty}
+Interview Type: ${interviewType}
+Number of Questions: ${totalQuestions}
+`,
+      },
+    ],
+    temperature: 0.4,
+    response_format: {
+      type: "json_object",
+    },
+  });
+
+  const content = completion.choices[0]?.message?.content;
+
+  if (!content) {
+    throw new Error("AI returned an empty response.");
+  }
+
+  return JSON.parse(content);
+};
+
+export const EvaluateInterview = async (
+  targetRole: string,
+  difficulty: string,
+  interviewType: string,
+  answers: {
+    questionId: number;
+    question: string;
+    answer: string;
+  }[],
+) => {
+  const completion = await groq.chat.completions.create({
+    model: "llama-3.3-70b-versatile",
+    messages: [
+      {
+        role: "system",
+        content: `
+You are an expert technical interviewer and interview evaluator.
+
+Evaluate a candidate's mock interview performance.
+
+Evaluate each answer based on:
+- Technical accuracy
+- Relevance to the question
+- Depth of understanding
+- Clarity of explanation
+- Practical knowledge
+
+For behavioral questions, evaluate:
+- Communication
+- Relevance
+- Structure of the response
+- Problem-solving approach
+- Professional maturity
+
+SCORING RULES:
+
+- The overallScore must be an integer between 0 and 100.
+- Do not inflate scores.
+- Strong and accurate answers should score highly.
+- Partially correct answers should receive moderate scores.
+- Incorrect, vague, or irrelevant answers should reduce the score.
+- Empty or extremely weak answers should receive very low scores.
+
+For each answer:
+- Give a score from 0 to 10.
+- Give concise but useful feedback.
+- Explain what was done well.
+- Explain what could be improved.
+
+For strengths:
+- Identify patterns in what the candidate did well.
+
+For weaknesses:
+- Identify recurring weaknesses across the interview.
+
+For recommendedTopics:
+- Suggest specific concepts or topics the candidate should study.
+
+Return ONLY valid JSON.
+
+JSON schema:
+
+{
+  "overallScore": number,
+  "summary": string,
+  "strengths": string[],
+  "weaknesses": string[],
+  "recommendedTopics": string[],
+  "questionFeedback": [
+    {
+      "questionId": number,
+      "score": number,
+      "feedback": string
+    }
+  ]
+}
+
+Do not include markdown.
+Do not include explanations outside the JSON.
+`,
+      },
+      {
+        role: "user",
+        content: `
+Target Role: ${targetRole}
+Difficulty: ${difficulty}
+Interview Type: ${interviewType}
+
+Interview Answers:
+
+${JSON.stringify(answers, null, 2)}
+`,
+      },
+    ],
+    temperature: 0.2,
+    response_format: {
+      type: "json_object",
+    },
+  });
+
+  const content = completion.choices[0]?.message?.content;
+
+  if (!content) {
+    throw new Error("AI returned an empty response.");
+  }
+
+  return JSON.parse(content);
+};
