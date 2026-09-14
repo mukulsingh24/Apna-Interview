@@ -156,7 +156,7 @@ export const AnalyzeJobMatch = async (
   jobDescription: string,
 ) => {
   const completion = await groq.chat.completions.create({
-    model: "llama-3.3-70b-versatile",
+    model: "openai/gpt-oss-20b",
     messages: [
       {
         role: "system",
@@ -232,7 +232,7 @@ export const GenerateInterviewQuestions = async (
   totalQuestions: number,
 ) => {
   const completion = await groq.chat.completions.create({
-    model: "llama-3.3-70b-versatile",
+    model: "openai/gpt-oss-20b",
     messages: [
       {
         role: "system",
@@ -308,7 +308,7 @@ export const EvaluateInterview = async (
   }[],
 ) => {
   const completion = await groq.chat.completions.create({
-    model: "llama-3.3-70b-versatile",
+    model: "openai/gpt-oss-20b",
     messages: [
       {
         role: "system",
